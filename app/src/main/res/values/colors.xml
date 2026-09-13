@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Google Classroom Colors -->
+    <color name="classroom_green">#0F9D58</color>
+    <color name="classroom_blue">#4285F4</color>
+    <color name="classroom_yellow">#F4B400</color>
+    <color name="classroom_red">#DB4437</color>
+
+    <!-- Task Type Colors (Google Style) -->
+    <color name="task_type_assignment">#4285F4</color>
+    <color name="task_type_quiz">#F4B400</color>
+    <color name="task_type_project">#0F9D58</color>
+    <color name="task_type_personal">#DB4437</color>
+
+    <!-- Priority Colors -->
+    <color name="priority_high">#DB4437</color>
+    <color name="priority_medium">#F4B400</color>
+    <color name="priority_low">#0F9D58</color>
+
+    <!-- Calendar Colors -->
+    <color name="calendar_selected_date">#3F51B5</color> <!-- Indigo -->
+
+    <!-- Other -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="dark_background">#121212</color>
+</resources>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorSurface"
+            android:theme="@style/CustomCalendarTheme"
+            android:dateTextAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:weekDayTextAppearance="@style/TextAppearance.AppCompat.Small"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:id="@+id/tvSelectedDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select a date"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔥 Due Today"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FF5722"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvTodayTasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No tasks due today."
+            android:textColor="?attr/colorOnSurface"
+            android:alpha="0.7"
+            android:padding="12dp"
+            android:background="?attr/colorSurface"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" Due Tomorrow"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#FFC107"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvTomorrowTasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No tasks due tomorrow."
+            android:textColor="?attr/colorOnSurface"
+            android:alpha="0.7"
+            android:padding="12dp"
+            android:background="?attr/colorSurface"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📅 This Week"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvWeekTasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No tasks this week."
+            android:textColor="?attr/colorOnSurface"
+            android:alpha="0.7"
+            android:padding="12dp"
+            android:background="?attr/colorSurface"/>
+
+    </LinearLayout>
+</ScrollView>
