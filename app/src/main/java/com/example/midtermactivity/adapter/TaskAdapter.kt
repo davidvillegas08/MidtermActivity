@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.midtermactivity.R
@@ -15,16 +14,16 @@ import com.example.midtermactivity.model.TaskType
 
 @Suppress("SetTextI18n")
 class TaskAdapter(
-    private var taskList: List<Task>, // Changed to var so we can update it when searching
+    private var taskList: List<Task>,
     private val onItemClick: (Task) -> Unit,
     private val onStatusChange: (Task) -> Unit,
-    private val onDeleteTask: (Task) -> Unit // Added delete callback
+    private val onDeleteTask: (Task) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     private var lastAnimatedPosition = -1
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val cardView: CardView = itemView.findViewById(R.id.cardView)
+        // Removed cardView, we will just animate the whole itemView now
         val tvType: TextView = itemView.findViewById(R.id.tvTaskType)
         val tvPriority: TextView = itemView.findViewById(R.id.tvPriority)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
@@ -60,35 +59,40 @@ class TaskAdapter(
         holder.tvTitle.text = task.title
         holder.tvSubject.text = task.subject
         holder.tvDescription.text = task.description
-        holder.tvDueDate.text = "Due: ${task.dueDate}"
+        holder.tvDueDate.text = "📅 Due: ${task.dueDate}"
         holder.tvStatus.text = if (task.isCompleted) "Completed" else "Pending"
 
         // Colors
-        val typeColor = when (task.type) { TaskType.ASSIGNMENT -> R.color.task_type_assignment; TaskType.QUIZ -> R.color.task_type_quiz; TaskType.PROJECT -> R.color.task_type_project; TaskType.PERSONAL -> R.color.task_type_personal }
+        val typeColor = when (task.type) {
+            TaskType.ASSIGNMENT -> R.color.task_type_assignment
+            TaskType.QUIZ -> R.color.task_type_quiz
+            TaskType.PROJECT -> R.color.task_type_project
+            TaskType.PERSONAL -> R.color.task_type_personal
+        }
         holder.tvType.setBackgroundColor(ContextCompat.getColor(context, typeColor))
 
-        val priorityColor = when (task.priority) { Priority.HIGH -> R.color.priority_high; Priority.MEDIUM -> R.color.priority_medium; Priority.LOW -> R.color.priority_low }
+        val priorityColor = when (task.priority) {
+            Priority.HIGH -> R.color.priority_high
+            Priority.MEDIUM -> R.color.priority_medium
+            Priority.LOW -> R.color.priority_low
+        }
         holder.tvPriority.setBackgroundColor(ContextCompat.getColor(context, priorityColor))
 
         // Status Animation & Revert Button
         if (task.isCompleted) {
             holder.tvTitle.paintFlags = holder.tvTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            holder.cardView.animate().alpha(0.6f).setDuration(300).start()
+            // Animate the whole itemView instead of cardView
+            holder.itemView.animate().alpha(0.6f).setDuration(300).start()
             holder.tvRevert.visibility = View.VISIBLE
             holder.tvRevert.setOnClickListener { onStatusChange(task) }
         } else {
             holder.tvTitle.paintFlags = holder.tvTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-            holder.cardView.animate().alpha(1.0f).setDuration(300).start()
+            // Animate the whole itemView instead of cardView
+            holder.itemView.animate().alpha(1.0f).setDuration(300).start()
             holder.tvRevert.visibility = View.GONE
         }
 
-        // Click Listeners
-        holder.itemView.setOnClickListener {
-            val clickPos = holder.adapterPosition
-            if (clickPos != RecyclerView.NO_POSITION) onItemClick(taskList[clickPos])
-        }
-
-        // Click Listeners
+        // Click Listeners (Cleaned up duplicate)
         holder.itemView.setOnClickListener {
             val clickPos = holder.adapterPosition
             if (clickPos != RecyclerView.NO_POSITION) onItemClick(taskList[clickPos])
@@ -102,7 +106,6 @@ class TaskAdapter(
             }
             true // Return true to indicate the long press was handled
         }
-
     }
 
     override fun getItemCount(): Int = taskList.size

@@ -16,7 +16,11 @@ import com.example.midtermactivity.model.TaskRepository
 
 class SettingsFragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_settings, container, false)
     }
 
@@ -35,12 +39,16 @@ class SettingsFragment : Fragment() {
 
         // Handle Switch Toggle
         switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            // 1. Apply the theme
+            // 1. Save the preference immediately
+            prefs.edit().putBoolean("dark_mode_enabled", isChecked).apply()
+
+            // 2. Apply the theme
             val mode = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             AppCompatDelegate.setDefaultNightMode(mode)
 
-            // 2. Save the preference so it remembers next time
-            prefs.edit().putBoolean("dark_mode_enabled", isChecked).apply()
+            // 3. MAGIC FIX: Force recreate the activity to apply theme INSTANTLY
+            // This prevents the "clunky" delay where it only updates when you switch tabs
+            requireActivity().recreate()
         }
 
         // Handle Reset Button
@@ -51,6 +59,9 @@ class SettingsFragment : Fragment() {
                 .setPositiveButton("Yes, Clear") { _, _ ->
                     TaskRepository.tasks.clear()
                     TaskRepository.nextId = 1
+
+                    // Optional: Notify adapter if you have a reference to it,
+                    // otherwise the user will see it clear when they go back to Home.
                     Toast.makeText(requireContext(), "Local data cleared!", Toast.LENGTH_SHORT).show()
                 }
                 .setNegativeButton("Cancel", null)

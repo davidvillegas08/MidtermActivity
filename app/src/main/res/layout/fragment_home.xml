@@ -1,95 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="?attr/colorSurfaceVariant">
 
-    ```
-    <!-- ==================== TITLE ==================== -->
-
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+    <!-- Header Section -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Student Tasks"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="?attr/colorOnSurface"
-        android:layout_margin="20dp"
+        android:orientation="vertical"
+        android:background="?attr/colorSurface"
+        android:paddingTop="24dp"
+        android:paddingBottom="16dp"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-
-    <!-- ==================== SEARCH BAR ==================== -->
-
-    <EditText
-        android:id="@+id/etSearchBar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="8dp"
-        android:hint="Search tasks..."
-        android:inputType="text"
-        android:background="@drawable/bg_input"
-        android:textColor="?attr/colorOnSurface"
-        android:textColorHint="?attr/colorOnSurface"
-        android:padding="12dp"
-        android:singleLine="true"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- UPDATED HEADER TEXT -->
+        <TextView
+            android:id="@+id/tvHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Student Task Manager"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface" />
 
-    <!-- ==================== TASK LIST ==================== -->
+        <EditText
+            android:id="@+id/etSearchBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="24dp"
+            android:hint="Search tasks..."
+            android:inputType="text"
+            android:background="@drawable/bg_rounded_card"
+            android:padding="14dp"
+            android:textColor="?attr/colorOnSurface"
+            android:textColorHint="?attr/colorOnSurfaceVariant" />
 
+    </LinearLayout>
+
+    <!-- Tasks List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewTasks"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:padding="8dp"
         android:clipToPadding="false"
-        app:layout_constraintTop_toBottomOf="@id/etSearchBar"
+        android:paddingTop="16dp"
+        android:paddingBottom="80dp"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-
-    <!-- ==================== EMPTY STATE ==================== -->
-
-    <TextView
-        android:id="@+id/tvEmptyState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No tasks!"
-        android:textSize="20sp"
-        android:textColor="?attr/colorOnSurface"
-        android:alpha="0.6"
-        android:textStyle="bold"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-    <!-- ==================== ADD TASK BUTTON ==================== -->
-
+    <!-- Add Task Button (FAB) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddTask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
-        android:contentDescription="Add Task"
         android:src="@android:drawable/ic_input_add"
-        app:backgroundTint="?attr/colorPrimary"
-        app:tint="?attr/colorOnPrimary"
+        android:contentDescription="Add Task"
+        android:backgroundTint="?attr/colorFloatingActionButton"
+        app:tint="?attr/colorOnFloatingActionButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-    ```
 
 </androidx.constraintlayout.widget.ConstraintLayout>

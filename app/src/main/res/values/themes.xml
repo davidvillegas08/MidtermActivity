@@ -1,18 +1,31 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.David" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
+
+        <!-- 1. Status Bar: Fixed Black -->
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- 2. Surface Colors for Light Mode -->
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorSurfaceVariant">#F5F5F5</item>
+        <item name="colorOnSurface">@android:color/black</item>
+        <item name="colorOnSurfaceVariant">#757575</item>
+        <item name="colorError">#B00020</item>
+
+        <!-- 3. FAB Colors for LIGHT Mode: Black background, White icon -->
+        <item name="colorFloatingActionButton">@android:color/black</item>
+        <item name="colorOnFloatingActionButton">@android:color/white</item>
+
     </style>
 
     <style name="Theme.David" parent="Base.Theme.David" />
 
     <!-- Custom theme for the Calendar View selected date circle -->
     <style name="CustomCalendarTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
-        <!-- Force BOTH primary and accent to a neutral grey -->
         <item name="colorPrimary">#757575</item>
         <item name="colorAccent">#757575</item>
         <item name="colorControlActivated">#757575</item>
-        <!-- Force the number inside the circle to be crisp white -->
         <item name="android:textColorPrimaryInverse">#FFFFFF</item>
     </style>
 </resources>

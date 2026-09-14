@@ -1,234 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/colorSurface"
-    android:padding="28dp">
+    android:fillViewport="true">
 
-    ```
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <!-- ==================== HEADER ==================== -->
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
-
-            <TextView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/colorPrimary"
-                android:gravity="center"
-                android:text="+"
-                android:textSize="24sp"
-                android:textColor="?attr/colorOnPrimary"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Create New Task"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="?attr/colorOnSurface"
-                android:layout_marginStart="12dp" />
-
-        </LinearLayout>
-
-
-        <!-- ==================== TASK TITLE ==================== -->
+        android:orientation="vertical"
+        android:padding="24dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Task Title *"
-            android:textSize="12sp"
+            android:text="Add New Task"
+            android:textSize="22sp"
+            android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
-            android:alpha="0.7"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="20dp"/>
 
+        <!-- Task Title -->
         <EditText
             android:id="@+id/etTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="e.g., Math Homework"
+            android:hint="Title *"
             android:inputType="textCapSentences"
-            android:background="@drawable/bg_input"
-            android:layout_marginBottom="16dp"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorHint="?attr/colorOnSurface"
-            android:padding="14dp" />
+            android:background="@drawable/bg_dialog_input"
+            android:textColor="?attr/colorOnSurfaceInverse"
+            android:textColorHint="?attr/colorOnSurfaceInverse"
+            android:layout_marginBottom="12dp"/>
 
-
-        <!-- ==================== SUBJECT ==================== -->
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Subject"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOnSurface"
-            android:alpha="0.7"
-            android:layout_marginBottom="4dp" />
-
+        <!-- Task Subject -->
         <EditText
             android:id="@+id/etSubject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="e.g., Mathematics"
-            android:inputType="textCapWords"
-            android:background="@drawable/bg_input"
-            android:layout_marginBottom="16dp"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorHint="?attr/colorOnSurface"
-            android:padding="14dp" />
+            android:hint="Subject"
+            android:inputType="text"
+            android:background="@drawable/bg_dialog_input"
+            android:textColor="?attr/colorOnSurfaceInverse"
+            android:textColorHint="?attr/colorOnSurfaceInverse"
+            android:layout_marginBottom="12dp"/>
 
-
-        <!-- ==================== DESCRIPTION ==================== -->
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Description"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOnSurface"
-            android:alpha="0.7"
-            android:layout_marginBottom="4dp" />
-
+        <!-- Task Description -->
         <EditText
             android:id="@+id/etDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Add details (optional)"
+            android:hint="Description"
             android:inputType="textMultiLine"
             android:minLines="2"
             android:gravity="top"
-            android:background="@drawable/bg_input"
-            android:layout_marginBottom="16dp"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorHint="?attr/colorOnSurface"
-            android:padding="14dp" />
+            android:background="@drawable/bg_dialog_input"
+            android:textColor="?attr/colorOnSurfaceInverse"
+            android:textColorHint="?attr/colorOnSurfaceInverse"
+            android:layout_marginBottom="12dp"/>
 
-
-        <!-- ==================== DUE DATE ==================== -->
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Due Date *"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOnSurface"
-            android:alpha="0.7"
-            android:layout_marginBottom="4dp" />
-
+        <!-- Task Due Date (FIXED TO OPEN CALENDAR) -->
         <EditText
             android:id="@+id/etDueDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="e.g., Sep 20, 2026"
-            android:inputType="text"
-            android:background="@drawable/bg_input"
-            android:layout_marginBottom="16dp"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorHint="?attr/colorOnSurface"
-            android:padding="14dp" />
+            android:hint="Due Date *"
+            android:inputType="none"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:background="@drawable/bg_dialog_input"
+            android:textColor="?attr/colorOnSurfaceInverse"
+            android:textColorHint="?attr/colorOnSurfaceInverse"
+            android:layout_marginBottom="12dp"/>
 
-
-        <!-- ==================== TYPE & PRIORITY ==================== -->
-
-        <LinearLayout
+        <!-- Task Type -->
+        <EditText
+            android:id="@+id/etType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:hint="Type (e.g., ASSIGNMENT, QUIZ, PROJECT)"
+            android:inputType="textCapCharacters"
+            android:background="@drawable/bg_dialog_input"
+            android:textColor="?attr/colorOnSurfaceInverse"
+            android:textColorHint="?attr/colorOnSurfaceInverse"
+            android:layout_marginBottom="12dp"/>
 
-            <!-- TYPE -->
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Type"
-                    android:textSize="12sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:alpha="0.7"
-                    android:layout_marginBottom="4dp" />
-
-                <EditText
-                    android:id="@+id/etType"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="ASSIGNMENT"
-                    android:inputType="textCapCharacters"
-                    android:background="@drawable/bg_input"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textColorHint="?attr/colorOnSurface"
-                    android:padding="14dp"
-                    android:layout_marginEnd="6dp" />
-
-            </LinearLayout>
-
-
-            <!-- PRIORITY -->
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Priority"
-                    android:textSize="12sp"
-                    android:textColor="?attr/colorOnSurface"
-                    android:alpha="0.7"
-                    android:layout_marginBottom="4dp" />
-
-                <EditText
-                    android:id="@+id/etPriority"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="HIGH"
-                    android:inputType="textCapCharacters"
-                    android:background="@drawable/bg_input"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textColorHint="?attr/colorOnSurface"
-                    android:padding="14dp"
-                    android:layout_marginStart="6dp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-
-        <!-- ==================== INPUT GUIDE ==================== -->
-
-        <TextView
+        <!-- Task Priority -->
+        <EditText
+            android:id="@+id/etPriority"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Type: ASSIGNMENT, QUIZ, PROJECT, PERSONAL&#10;Priority: HIGH, MEDIUM, LOW"
-            android:textSize="10sp"
-            android:textColor="?attr/colorOnSurface"
-            android:alpha="0.5"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp" />
+            android:hint="Priority (e.g., HIGH, MEDIUM, LOW)"
+            android:inputType="textCapCharacters"
+            android:background="@drawable/bg_dialog_input"
+            android:textColor="?attr/colorOnSurfaceInverse"
+            android:textColorHint="?attr/colorOnSurfaceInverse"
+            android:layout_marginBottom="12dp"/>
 
     </LinearLayout>
-    ```
-
 </ScrollView>

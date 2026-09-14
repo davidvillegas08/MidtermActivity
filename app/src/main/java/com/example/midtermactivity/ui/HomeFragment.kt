@@ -1,155 +1,86 @@
 package com.example.midtermactivity.ui
 
-import android.app.AlertDialog
-import android.graphics.Canvas
-import android.graphics.Color
+import android.app.DatePickerDialog
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.midtermactivity.R
 import com.example.midtermactivity.adapter.TaskAdapter
 import com.example.midtermactivity.model.Priority
 import com.example.midtermactivity.model.Task
-import com.example.midtermactivity.model.TaskRepository
 import com.example.midtermactivity.model.TaskType
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
     private lateinit var taskAdapter: TaskAdapter
-    private lateinit var tvEmptyState: TextView
-    private lateinit var etSearchBar: EditText
-    private lateinit var fabAddTask: FloatingActionButton
+    private val taskList = mutableListOf<Task>()
 
-    private val displayedTasks = mutableListOf<Task>()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView = view.findViewById(R.id.recyclerViewTasks)
-        tvEmptyState = view.findViewById(R.id.tvEmptyState)
-        etSearchBar = view.findViewById(R.id.etSearchBar)
-        fabAddTask = view.findViewById(R.id.fabAddTask)
+        setupRecyclerView(view)
+        setupFab(view)
+    }
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+    private fun setupRecyclerView(view: View) {
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewTasks)
 
-        // Initialize Adapter
         taskAdapter = TaskAdapter(
-            taskList = displayedTasks,
-            onItemClick = { task -> Toast.makeText(requireContext(), "Clicked: ${task.title}", Toast.LENGTH_SHORT).show() },
+            taskList = taskList,
+            onItemClick = { task ->
+                // Handle item click (e.g., open details)
+                Toast.makeText(requireContext(), "Clicked: ${task.title}", Toast.LENGTH_SHORT).show()
+            },
             onStatusChange = { task ->
-                // Update the status in the main repository list
-                val index = TaskRepository.tasks.indexOfFirst { it.id == task.id }
+                // FIX: Find the index and update the task in the list
+                val index = taskList.indexOfFirst { it.id == task.id }
                 if (index != -1) {
-                    TaskRepository.tasks[index] = task.copy(isCompleted = !task.isCompleted)
-                    applyCurrentSearch() // Refresh UI
+                    // Create a copy with toggled completion status
+                    val updatedTask = task.copy(isCompleted = !task.isCompleted)
+                    taskList[index] = updatedTask
+                    taskAdapter.updateList(taskList.toList())
                 }
             },
             onDeleteTask = { task ->
-                TaskRepository.tasks.removeIf { it.id == task.id }
-                applyCurrentSearch()
+                // Handle delete
+                taskList.remove(task)
+                taskAdapter.updateList(taskList.toList())
             }
         )
+
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = taskAdapter
+    }
 
-        setupSwipeToDelete()
+    private fun setupFab(view: View) {
+        val fabAddTask = view.findViewById<FloatingActionButton>(R.id.fabAddTask)
 
-        // Search Bar Logic
-        etSearchBar.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                applyCurrentSearch()
-            }
-        })
-
-        // FAB Click Logic
         fabAddTask.setOnClickListener {
             showAddTaskDialog()
-        }
-
-        // Load initial data
-        applyCurrentSearch()
-    }
-
-    private fun setupSwipeToDelete() {
-        val swipeCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-            override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean = false
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val taskToDelete = displayedTasks[position]
-                    TaskRepository.tasks.removeIf { it.id == taskToDelete.id }
-                    applyCurrentSearch()
-                    Toast.makeText(requireContext(), "Task deleted", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
-                val itemView = viewHolder.itemView
-                val background = android.graphics.Paint().apply { color = Color.parseColor("#DB4437") }
-
-                if (dX > 0) {
-                    c.drawRect(itemView.left.toFloat(), itemView.top.toFloat(), dX, itemView.bottom.toFloat(), background)
-                } else if (dX < 0) {
-                    c.drawRect(itemView.right.toFloat() + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat(), background)
-                }
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-            }
-        }
-        ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView)
-    }
-
-    private fun applyCurrentSearch() {
-        val query = etSearchBar.text.toString().trim().lowercase()
-        displayedTasks.clear()
-
-        if (query.isEmpty()) {
-            displayedTasks.addAll(TaskRepository.tasks)
-        } else {
-            val filtered = TaskRepository.tasks.filter {
-                it.title.lowercase().contains(query) ||
-                        it.subject.lowercase().contains(query) ||
-                        it.description.lowercase().contains(query)
-            }
-            displayedTasks.addAll(filtered)
-        }
-
-        taskAdapter.updateList(displayedTasks)
-        updateEmptyState()
-    }
-
-    private fun updateEmptyState() {
-        if (TaskRepository.tasks.isEmpty()) {
-            tvEmptyState.visibility = View.VISIBLE
-            tvEmptyState.text = "No tasks!"
-        } else if (displayedTasks.isEmpty()) {
-            tvEmptyState.visibility = View.VISIBLE
-            tvEmptyState.text = "No matching tasks found."
-        } else {
-            tvEmptyState.visibility = View.GONE
         }
     }
 
     private fun showAddTaskDialog() {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_task, null)
+        // 1. Inflate the dialog view
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_task, null)
 
+        // 2. Find all the views
         val etTitle = dialogView.findViewById<EditText>(R.id.etTitle)
         val etSubject = dialogView.findViewById<EditText>(R.id.etSubject)
         val etDescription = dialogView.findViewById<EditText>(R.id.etDescription)
@@ -157,31 +88,79 @@ class HomeFragment : Fragment() {
         val etType = dialogView.findViewById<EditText>(R.id.etType)
         val etPriority = dialogView.findViewById<EditText>(R.id.etPriority)
 
+        // 3. Make Due Date open the Calendar when clicked
+        etDueDate.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePicker = DatePickerDialog(
+                requireContext(),
+                { _, selectedYear, selectedMonth, selectedDay ->
+                    val formattedDate = "$selectedYear-${selectedMonth + 1}-$selectedDay"
+                    etDueDate.setText(formattedDate)
+                },
+                year, month, day
+            )
+            datePicker.show()
+        }
+
+        // 4. Build the AlertDialog
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
-                val title = etTitle.text.toString().trim()
-                val subject = etSubject.text.toString().trim()
-                val description = etDescription.text.toString().trim()
-                val dueDate = etDueDate.text.toString().trim()
+                val titleText = etTitle.text.toString().trim()
+                val subjectText = etSubject.text.toString().trim()
+                val descText = etDescription.text.toString().trim()
+                val dueDateText = etDueDate.text.toString().trim()
 
-                val type = try { TaskType.valueOf(etType.text.toString().uppercase().trim()) } catch (e: Exception) { TaskType.ASSIGNMENT }
-                val priority = try { Priority.valueOf(etPriority.text.toString().uppercase().trim()) } catch (e: Exception) { Priority.MEDIUM }
-
-                if (title.isNotEmpty() && dueDate.isNotEmpty()) {
-                    TaskRepository.tasks.add(Task(TaskRepository.nextId++, title, description, type, subject, dueDate, priority, false))
-                    applyCurrentSearch()
-                    recyclerView.scrollToPosition(displayedTasks.size - 1)
-                } else {
-                    Toast.makeText(requireContext(), "Please fill in Title and Due Date", Toast.LENGTH_SHORT).show()
+                val typeText = etType.text.toString().trim().uppercase()
+                val taskType = try {
+                    TaskType.valueOf(typeText)
+                } catch (e: Exception) {
+                    TaskType.ASSIGNMENT
                 }
+
+                val priorityText = etPriority.text.toString().trim().uppercase()
+                val priority = try {
+                    Priority.valueOf(priorityText)
+                } catch (e: Exception) {
+                    Priority.MEDIUM
+                }
+
+                if (titleText.isEmpty()) {
+                    Toast.makeText(requireContext(), "Please fill in the Task Title", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (dueDateText.isEmpty() || dueDateText == "Due Date *") {
+                    Toast.makeText(requireContext(), "Please tap to select a Due Date", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                // FIX: Generate a unique ID for the new task
+                val newId = if (taskList.isEmpty()) 1 else taskList.maxOf { it.id } + 1
+
+                val newTask = Task(
+                    id = newId, // FIX: Provide the id parameter
+                    title = titleText,
+                    description = if (descText.isEmpty()) "No description" else descText,
+                    type = taskType,
+                    subject = if (subjectText.isEmpty()) "General" else subjectText,
+                    dueDate = dueDateText,
+                    priority = priority,
+                    isCompleted = false
+                )
+
+                taskList.add(newTask)
+                taskAdapter.updateList(taskList.toList())
+
+                Toast.makeText(requireContext(), "Task Saved!", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
             .create()
 
         dialog.show()
-        dialog.window?.setBackgroundDrawableResource(android.R.color.white)
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(0xFF9C27B0.toInt()) // Purple
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(0xFF5F6368.toInt()) // Dark Gray
     }
 }
