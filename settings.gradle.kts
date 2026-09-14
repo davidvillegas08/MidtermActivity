@@ -22,6 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Ui activity"
+rootProject.name = "MidtermActivity"
 include(":app")
- 
