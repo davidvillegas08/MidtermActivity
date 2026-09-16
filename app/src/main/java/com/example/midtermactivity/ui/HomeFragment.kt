@@ -6,9 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.midtermactivity.R
@@ -23,6 +25,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var taskAdapter: TaskAdapter
     private val taskList = mutableListOf<Task>()
+    private lateinit var tvEmptyState: TextView
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,38 +38,62 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tvEmptyState = view.findViewById(R.id.tvEmptyState)
+
         setupRecyclerView(view)
         setupFab(view)
+
+        // Check empty state on initial load
+        updateEmptyState()
     }
 
     private fun setupRecyclerView(view: View) {
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewTasks)
+        recyclerView = view.findViewById(R.id.recyclerViewTasks)
 
         taskAdapter = TaskAdapter(
             taskList = taskList,
             onItemClick = { task ->
-                // Handle item click (e.g., open details)
                 Toast.makeText(requireContext(), "Clicked: ${task.title}", Toast.LENGTH_SHORT).show()
             },
             onStatusChange = { task ->
-                // FIX: Find the index and update the task in the list
                 val index = taskList.indexOfFirst { it.id == task.id }
                 if (index != -1) {
-                    // Create a copy with toggled completion status
                     val updatedTask = task.copy(isCompleted = !task.isCompleted)
                     taskList[index] = updatedTask
-                    taskAdapter.updateList(taskList.toList())
+                    taskAdapter.notifyItemChanged(index)
                 }
             },
             onDeleteTask = { task ->
-                // Handle delete
                 taskList.remove(task)
-                taskAdapter.updateList(taskList.toList())
+                taskAdapter.notifyDataSetChanged()
             }
         )
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = taskAdapter
+
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+
+                if (position != RecyclerView.NO_POSITION) {
+                    taskList.removeAt(position)
+                    taskAdapter.notifyItemRemoved(position)
+                    updateEmptyState() // ✅ Update UI after deleting
+                    Toast.makeText(requireContext(), "Task deleted", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     private fun setupFab(view: View) {
@@ -76,11 +104,20 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // ✅ MAGIC FUNCTION: Toggles between the List and the Empty Text
+    private fun updateEmptyState() {
+        if (taskList.isEmpty()) {
+            tvEmptyState.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+        } else {
+            tvEmptyState.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+        }
+    }
+
     private fun showAddTaskDialog() {
-        // 1. Inflate the dialog view
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_task, null)
 
-        // 2. Find all the views
         val etTitle = dialogView.findViewById<EditText>(R.id.etTitle)
         val etSubject = dialogView.findViewById<EditText>(R.id.etSubject)
         val etDescription = dialogView.findViewById<EditText>(R.id.etDescription)
@@ -88,7 +125,6 @@ class HomeFragment : Fragment() {
         val etType = dialogView.findViewById<EditText>(R.id.etType)
         val etPriority = dialogView.findViewById<EditText>(R.id.etPriority)
 
-        // 3. Make Due Date open the Calendar when clicked
         etDueDate.setOnClickListener {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
@@ -106,7 +142,6 @@ class HomeFragment : Fragment() {
             datePicker.show()
         }
 
-        // 4. Build the AlertDialog
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
@@ -139,11 +174,10 @@ class HomeFragment : Fragment() {
                     return@setPositiveButton
                 }
 
-                // FIX: Generate a unique ID for the new task
                 val newId = if (taskList.isEmpty()) 1 else taskList.maxOf { it.id } + 1
 
                 val newTask = Task(
-                    id = newId, // FIX: Provide the id parameter
+                    id = newId,
                     title = titleText,
                     description = if (descText.isEmpty()) "No description" else descText,
                     type = taskType,
@@ -154,7 +188,8 @@ class HomeFragment : Fragment() {
                 )
 
                 taskList.add(newTask)
-                taskAdapter.updateList(taskList.toList())
+                taskAdapter.notifyItemInserted(taskList.size - 1)
+                updateEmptyState() // ✅ Update UI after adding
 
                 Toast.makeText(requireContext(), "Task Saved!", Toast.LENGTH_SHORT).show()
             }

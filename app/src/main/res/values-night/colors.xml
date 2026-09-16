@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
-    <!-- FAB Background (Light Grey for Dark Mode) -->
+
+    <!-- FAB Background -->
     <color name="fab_background">#D3D3D3</color>
+
+    <!-- Bottom Navigation Active Pill - DARK MODE -->
+    <color name="bottom_nav_pill">#FFFFFF</color>
+
 </resources>

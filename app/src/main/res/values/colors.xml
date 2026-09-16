@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+
     <!-- Google Classroom Colors -->
     <color name="classroom_green">#0F9D58</color>
     <color name="classroom_blue">#4285F4</color>
@@ -18,13 +20,17 @@
     <color name="priority_low">#0F9D58</color>
 
     <!-- Calendar Colors -->
-    <color name="calendar_selected_date">#3F51B5</color> <!-- Indigo -->
+    <color name="calendar_selected_date">#3F51B5</color>
 
     <!-- Other -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="dark_background">#121212</color>
 
-    <!-- FAB Background (White for Light Mode) -->
+    <!-- FAB Background -->
     <color name="fab_background">#FFFFFF</color>
+
+    <!-- Bottom Navigation Active Pill - LIGHT MODE -->
+    <color name="bottom_nav_pill">#000000</color>
+
 </resources>
