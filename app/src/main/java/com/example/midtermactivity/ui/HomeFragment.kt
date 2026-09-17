@@ -43,7 +43,6 @@ class HomeFragment : Fragment() {
         setupRecyclerView(view)
         setupFab(view)
 
-        // Check empty state on initial load
         updateEmptyState()
     }
 
@@ -87,7 +86,7 @@ class HomeFragment : Fragment() {
                 if (position != RecyclerView.NO_POSITION) {
                     taskList.removeAt(position)
                     taskAdapter.notifyItemRemoved(position)
-                    updateEmptyState() // ✅ Update UI after deleting
+                    updateEmptyState()
                     Toast.makeText(requireContext(), "Task deleted", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -104,7 +103,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // ✅ MAGIC FUNCTION: Toggles between the List and the Empty Text
     private fun updateEmptyState() {
         if (taskList.isEmpty()) {
             tvEmptyState.visibility = View.VISIBLE
@@ -189,7 +187,7 @@ class HomeFragment : Fragment() {
 
                 taskList.add(newTask)
                 taskAdapter.notifyItemInserted(taskList.size - 1)
-                updateEmptyState() // ✅ Update UI after adding
+                updateEmptyState()
 
                 Toast.makeText(requireContext(), "Task Saved!", Toast.LENGTH_SHORT).show()
             }
