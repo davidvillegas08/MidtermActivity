@@ -8,9 +8,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.midtermactivity.R
-import com.example.midtermactivity.model.Priority
 import com.example.midtermactivity.model.Task
-import com.example.midtermactivity.model.TaskType
 
 @Suppress("SetTextI18n")
 class TaskAdapter(
@@ -23,7 +21,6 @@ class TaskAdapter(
     private var lastAnimatedPosition = -1
 
     class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Removed cardView, we will just animate the whole itemView now
         val tvType: TextView = itemView.findViewById(R.id.tvTaskType)
         val tvPriority: TextView = itemView.findViewById(R.id.tvPriority)
         val tvTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
@@ -53,46 +50,46 @@ class TaskAdapter(
             lastAnimatedPosition = currentPosition
         }
 
-        // Set Text
-        holder.tvType.text = task.type.name
-        holder.tvPriority.text = task.priority.name
+        // Set Text (Removed .name since they are now Strings)
+        holder.tvType.text = task.type
+        holder.tvPriority.text = task.priority
         holder.tvTitle.text = task.title
         holder.tvSubject.text = task.subject
         holder.tvDescription.text = task.description
         holder.tvDueDate.text = "📅 Due: ${task.dueDate}"
         holder.tvStatus.text = if (task.isCompleted) "Completed" else "Pending"
 
-        // Colors
-        val typeColor = when (task.type) {
-            TaskType.ASSIGNMENT -> R.color.task_type_assignment
-            TaskType.QUIZ -> R.color.task_type_quiz
-            TaskType.PROJECT -> R.color.task_type_project
-            TaskType.PERSONAL -> R.color.task_type_personal
+        // Colors (Updated to use String literals and added 'else' fallbacks)
+        val typeColor = when (task.type.uppercase()) {
+            "ASSIGNMENT" -> R.color.task_type_assignment
+            "QUIZ" -> R.color.task_type_quiz
+            "PROJECT" -> R.color.task_type_project
+            "PERSONAL" -> R.color.task_type_personal
+            else -> R.color.task_type_assignment // Default fallback
         }
         holder.tvType.setBackgroundColor(ContextCompat.getColor(context, typeColor))
 
-        val priorityColor = when (task.priority) {
-            Priority.HIGH -> R.color.priority_high
-            Priority.MEDIUM -> R.color.priority_medium
-            Priority.LOW -> R.color.priority_low
+        val priorityColor = when (task.priority.uppercase()) {
+            "HIGH" -> R.color.priority_high
+            "MEDIUM" -> R.color.priority_medium
+            "LOW" -> R.color.priority_low
+            else -> R.color.priority_medium // Default fallback
         }
         holder.tvPriority.setBackgroundColor(ContextCompat.getColor(context, priorityColor))
 
         // Status Animation & Revert Button
         if (task.isCompleted) {
             holder.tvTitle.paintFlags = holder.tvTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            // Animate the whole itemView instead of cardView
             holder.itemView.animate().alpha(0.6f).setDuration(300).start()
             holder.tvRevert.visibility = View.VISIBLE
             holder.tvRevert.setOnClickListener { onStatusChange(task) }
         } else {
             holder.tvTitle.paintFlags = holder.tvTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-            // Animate the whole itemView instead of cardView
             holder.itemView.animate().alpha(1.0f).setDuration(300).start()
             holder.tvRevert.visibility = View.GONE
         }
 
-        // Click Listeners (Cleaned up duplicate)
+        // Click Listeners
         holder.itemView.setOnClickListener {
             val clickPos = holder.adapterPosition
             if (clickPos != RecyclerView.NO_POSITION) onItemClick(taskList[clickPos])
