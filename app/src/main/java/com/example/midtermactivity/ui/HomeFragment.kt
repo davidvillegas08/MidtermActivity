@@ -10,20 +10,23 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.midtermactivity.R
+import com.example.midtermactivity.TaskApp
 import com.example.midtermactivity.adapter.TaskAdapter
-import com.example.midtermactivity.model.Priority
+import com.example.midtermactivity.database.TaskDao
 import com.example.midtermactivity.model.Task
-import com.example.midtermactivity.model.TaskType
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
     private lateinit var taskAdapter: TaskAdapter
+    private lateinit var taskDao: TaskDao
     private val taskList = mutableListOf<Task>()
     private lateinit var tvEmptyState: TextView
     private lateinit var recyclerView: RecyclerView
@@ -40,10 +43,25 @@ class HomeFragment : Fragment() {
 
         tvEmptyState = view.findViewById(R.id.tvEmptyState)
 
+        // 1. Get the DAO from our global Application class
+        taskDao = (requireActivity().application as TaskApp).database.taskDao()
+
         setupRecyclerView(view)
         setupFab(view)
 
-        updateEmptyState()
+        // 2. Load tasks from the database when the screen opens
+        loadTasksFromDatabase()
+    }
+
+    private fun loadTasksFromDatabase() {
+        // lifecycleScope ensures this runs in the background and cancels if the fragment is destroyed
+        viewLifecycleOwner.lifecycleScope.launch {
+            val tasksFromDb = taskDao.getAllTasks()
+            taskList.clear()
+            taskList.addAll(tasksFromDb)
+            taskAdapter.notifyDataSetChanged()
+            updateEmptyState()
+        }
     }
 
     private fun setupRecyclerView(view: View) {
@@ -60,17 +78,28 @@ class HomeFragment : Fragment() {
                     val updatedTask = task.copy(isCompleted = !task.isCompleted)
                     taskList[index] = updatedTask
                     taskAdapter.notifyItemChanged(index)
+
+                    // Save the updated status to the database
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        taskDao.insertTask(updatedTask) // REPLACE strategy updates it
+                    }
                 }
             },
             onDeleteTask = { task ->
                 taskList.remove(task)
                 taskAdapter.notifyDataSetChanged()
+
+                // Delete from database
+                viewLifecycleOwner.lifecycleScope.launch {
+                    taskDao.deleteTask(task)
+                }
             }
         )
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = taskAdapter
 
+        // Swipe to Delete (Left)
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -84,9 +113,18 @@ class HomeFragment : Fragment() {
                 val position = viewHolder.adapterPosition
 
                 if (position != RecyclerView.NO_POSITION) {
+                    val deletedTask = taskList[position]
+
+                    // 1. Remove from local list and update UI
                     taskList.removeAt(position)
                     taskAdapter.notifyItemRemoved(position)
                     updateEmptyState()
+
+                    // 2. Delete from database in the background
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        taskDao.deleteTask(deletedTask)
+                    }
+
                     Toast.makeText(requireContext(), "Task deleted", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -97,7 +135,6 @@ class HomeFragment : Fragment() {
 
     private fun setupFab(view: View) {
         val fabAddTask = view.findViewById<FloatingActionButton>(R.id.fabAddTask)
-
         fabAddTask.setOnClickListener {
             showAddTaskDialog()
         }
@@ -125,17 +162,14 @@ class HomeFragment : Fragment() {
 
         etDueDate.setOnClickListener {
             val calendar = Calendar.getInstance()
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            val day = calendar.get(Calendar.DAY_OF_MONTH)
-
             val datePicker = DatePickerDialog(
                 requireContext(),
-                { _, selectedYear, selectedMonth, selectedDay ->
-                    val formattedDate = "$selectedYear-${selectedMonth + 1}-$selectedDay"
-                    etDueDate.setText(formattedDate)
+                { _, year, month, day ->
+                    etDueDate.setText("$year-${month + 1}-$day")
                 },
-                year, month, day
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
             )
             datePicker.show()
         }
@@ -147,49 +181,35 @@ class HomeFragment : Fragment() {
                 val subjectText = etSubject.text.toString().trim()
                 val descText = etDescription.text.toString().trim()
                 val dueDateText = etDueDate.text.toString().trim()
+                val typeText = etType.text.toString().trim().uppercase().ifEmpty { "ASSIGNMENT" }
+                val priorityText = etPriority.text.toString().trim().uppercase().ifEmpty { "MEDIUM" }
 
-                val typeText = etType.text.toString().trim().uppercase()
-                val taskType = try {
-                    TaskType.valueOf(typeText)
-                } catch (e: Exception) {
-                    TaskType.ASSIGNMENT
-                }
-
-                val priorityText = etPriority.text.toString().trim().uppercase()
-                val priority = try {
-                    Priority.valueOf(priorityText)
-                } catch (e: Exception) {
-                    Priority.MEDIUM
-                }
-
-                if (titleText.isEmpty()) {
-                    Toast.makeText(requireContext(), "Please fill in the Task Title", Toast.LENGTH_SHORT).show()
+                if (titleText.isEmpty() || dueDateText.isEmpty()) {
+                    Toast.makeText(requireContext(), "Title and Due Date are required!", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
 
-                if (dueDateText.isEmpty() || dueDateText == "Due Date *") {
-                    Toast.makeText(requireContext(), "Please tap to select a Due Date", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                val newId = if (taskList.isEmpty()) 1 else taskList.maxOf { it.id } + 1
-
+                // Create the new task (ID will be auto-generated by the database)
                 val newTask = Task(
-                    id = newId,
+                    id = 0, // 0 tells Room to auto-generate the ID
                     title = titleText,
-                    description = if (descText.isEmpty()) "No description" else descText,
-                    type = taskType,
-                    subject = if (subjectText.isEmpty()) "General" else subjectText,
+                    description = descText.ifEmpty { "No description" },
+                    type = typeText,
+                    subject = subjectText.ifEmpty { "General" },
                     dueDate = dueDateText,
-                    priority = priority,
+                    priority = priorityText,
                     isCompleted = false
                 )
 
-                taskList.add(newTask)
-                taskAdapter.notifyItemInserted(taskList.size - 1)
-                updateEmptyState()
+                // 1. Insert into database
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val insertedId = taskDao.insertTask(newTask)
+                    // Note: insertTask returns the new row ID if you change the DAO to return Long,
+                    // but for now, we just refresh the list to be safe.
+                    loadTasksFromDatabase()
+                }
 
-                Toast.makeText(requireContext(), "Task Saved!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Task Saved to Database!", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
             .create()

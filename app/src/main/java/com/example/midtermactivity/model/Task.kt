@@ -1,25 +1,23 @@
 package com.example.midtermactivity.model
 
-enum class TaskType {
-    ASSIGNMENT,
-    QUIZ,
-    PROJECT,
-    PERSONAL
-}
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-enum class Priority {
-    LOW,
-    MEDIUM,
-    HIGH
-}
-
+// 1. @Entity tells Room to create a table named "tasks"
+@Entity(tableName = "tasks")
 data class Task(
-    val id: Int,
+    // 2. @PrimaryKey tells Room this is the unique ID for the row
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+
     val title: String,
     val description: String,
-    val type: TaskType,
+
+    // We use String here instead of Enums to make database saving much easier!
+    val type: String,
     val subject: String,
     val dueDate: String,
-    val priority: Priority,
+    val priority: String,
+
     val isCompleted: Boolean
 )
